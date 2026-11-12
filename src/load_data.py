@@ -5,9 +5,9 @@ DATA_DIR = Path("data")
 DATA_DIR.mkdir(exist_ok=True)
 
 
-def fetch_torvik_team_data(season: int = 2026) -> pd.DataFrame:
+def fetch_torvik_team_data(season: int = 2027) -> pd.DataFrame:
   """Fetches BartTorvik efficiency and Four Factors data, merging into a single parquet."""
-  # 1. Base results & efficiency
+  # 1. Base results & efficiency (no header row)
   base_url = f"https://barttorvik.com/{season}_team_results.csv"
   base_cols = [
       "rank",
@@ -34,48 +34,31 @@ def fetch_torvik_team_data(season: int = 2026) -> pd.DataFrame:
       base_url, header=None, usecols=range(len(base_cols)), names=base_cols
   )
 
-  # 2. Four Factors
+# 2. Four Factors (use header=None so row 0 isn't dropped during the active season)
   ff_url = f"https://barttorvik.com/{season}_fffinal.csv"
-  # Standard column positions in Torvik's fffinal table
-  # cols: team, conf, games, o_efg, d_efg, o_to, d_to, o_orb, d_orb, o_ftr, d_ftr
-  ff_cols = [
+  print(f"Fetching {season} BartTorvik four factors...")
+
+  ff_indices = [0, 1, 3, 5, 7, 9, 11, 13, 15]
+  ff_names = [
       "team",
-      "conf_ff",
-      "games_ff",
       "off_efg",
       "def_efg",
-      "off_to",
-      "def_to",
-      "off_orb",
-      "def_orb",
       "off_ftr",
       "def_ftr",
+      "off_orb",
+      "def_orb",
+      "off_to",
+      "def_to",
   ]
-
-  print(f"Fetching {season} BartTorvik four factors...")
   ff_df = pd.read_csv(
-      ff_url, header=None, usecols=range(len(ff_cols)), names=ff_cols
+      ff_url, header=None, usecols=ff_indices, names=ff_names
   )
+  ff_df = ff_df[ff_df["team"] != "TeamName"]  # Safely drop header if present
 
   # Clean strings before merging
   base_df["team"] = base_df["team"].astype(str).str.strip()
   base_df["conf"] = base_df["conf"].astype(str).str.strip()
   ff_df["team"] = ff_df["team"].astype(str).str.strip()
-
-  # Drop duplicate team column before merge
-  ff_df = ff_df[
-      [
-          "team",
-          "off_efg",
-          "def_efg",
-          "off_to",
-          "def_to",
-          "off_orb",
-          "def_orb",
-          "off_ftr",
-          "def_ftr",
-      ]
-  ]
 
   merged_df = pd.merge(base_df, ff_df, on="team", how="inner")
 
@@ -114,4 +97,4 @@ def fetch_torvik_team_data(season: int = 2026) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-  fetch_torvik_team_data(season=2026)
+  fetch_torvik_team_data(season=2027)

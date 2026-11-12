@@ -35,21 +35,25 @@ st.markdown(
 
 st.set_page_config(page_title="CBB Efficiency Dashboard", layout="wide")
 
+CURRENT_SEASON = 2027
 
-# Cache data loading so it only loads once into memory
-@st.cache_data
-def load_data():
-  data_path = Path("data/torvik_teams_2026.parquet")
+
+@st.cache_data(ttl=3600)
+def load_data(season: int, file_mtime: float) -> pd.DataFrame:
+  data_path = Path(f"data/torvik_teams_{season}.parquet")
   if not data_path.exists():
     from src.load_data import fetch_torvik_team_data
 
-    return fetch_torvik_team_data(2026)
+    return fetch_torvik_team_data(season)
   return pd.read_parquet(data_path)
 
 
-df = load_data()
+parquet_path = Path(f"data/torvik_teams_{CURRENT_SEASON}.parquet")
+mtime = parquet_path.stat().st_mtime if parquet_path.exists() else 0.0
+df = load_data(CURRENT_SEASON, mtime)
 
-st.title("🏀 College Basketball Efficiency Analytics (2025–26)")
+
+st.title("🏀 College Basketball Efficiency Analytics (2026-27)")
 
 # --- Sidebar Filters ---
 st.sidebar.header("Navigation & Filters")

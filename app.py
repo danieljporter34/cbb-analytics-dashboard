@@ -3,6 +3,36 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+st.markdown(
+    """
+<style>
+    /* Style all st.container(border=True) boxes */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        background: linear-gradient(145deg, #162032 0%, #0F172A 100%);
+        border: 1px solid #2A3950 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+        padding: 1.25rem;
+        transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+    [data-testid="stVerticalBlockBorderWrapper"]:hover {
+        border-color: #FF6B35 !important;
+    }
+
+    /* Style all st.metric(..., border=True) KPI cards */
+    [data-testid="stMetric"] {
+        background-color: #131C2E;
+        border: 1px solid #2A3950 !important;
+        border-left: 4px solid #FF6B35 !important; /* Basketball orange accent stripe */
+        border-radius: 8px !important;
+        padding: 1rem 1.25rem !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    }
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
 st.set_page_config(page_title="CBB Efficiency Dashboard", layout="wide")
 
 
@@ -38,19 +68,19 @@ team_row = df[df["team"] == selected_team].iloc[0]
 
 # --- Top-Level KPI Cards ---
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("National Rank", f"#{int(team_row['rank'])}")
+col1.metric("National Rank", f"#{int(team_row['rank'])}", border=True)
 col2.metric(
     "Adj. Offense (AdjO)",
     f"{team_row['adj_o']:.1f}",
-    help="Points scored per 100 possessions (adjusted)",
+    help="Points scored per 100 possessions (adjusted)", border=True
 )
 col3.metric(
     "Adj. Defense (AdjD)",
     f"{team_row['adj_d']:.1f}",
-    help="Points allowed per 100 possessions (lower is better)",
+    help="Points allowed per 100 possessions (lower is better)", border=True
 )
 col4.metric(
-    "Adj. Tempo", f"{team_row['adj_tempo']:.1f}", help="Possessions per 40 mins"
+    "Adj. Tempo", f"{team_row['adj_tempo']:.1f}", help="Possessions per 40 mins", border=True
 )
 
 st.divider()
@@ -70,13 +100,25 @@ fig = px.scatter(
     y="adj_d",
     hover_name="team",
     color="Highlight",
-    color_discrete_map={"Selected Team": "#FF4B4B", "Other Teams": "#636EFA"},
+    color_discrete_map = ({"Selected Team": "#FF4B4B", "Other Teams": "rgba(241, 245, 249, 0.45)"}),
     labels={"adj_o": "Adjusted Offense (Points / 100 Poss)", "adj_d": "Adjusted Defense (Points Allowed / 100 Poss)"},
 )
 
 # Inverted Y axis because lower defense is better in basketball
 fig.update_yaxes(autorange="reversed")
-st.plotly_chart(fig, width="stretch")
+fig.update_layout(
+    dragmode="pan",)
+
+fig.update_traces(
+    selector=dict(name="Other Teams"),
+    marker=dict(size=7),
+)
+fig.update_traces(
+    selector=dict(name="Selected Team"),
+    marker=dict(size=14, line=dict(width=2, color="#FFFFFF")),
+)
+
+st.plotly_chart(fig, width="stretch", config={"scrollZoom": True})
 
 import plotly.graph_objects as go
 

@@ -1,0 +1,22 @@
+[theme]
+base = "dark"
+primaryColor = "#FF6B35"              # Accent color (buttons, active sliders, focus rings)
+backgroundColor = "#0B1120"           # Main app canvas (deep slate navy)
+secondaryBackgroundColor = "#162032"  # Card, sidebar, and input widget fill
+textColor = "#F1F5F9"                 # Crisp off-white text
+borderColor = "#2A3950"               # Subtle border color for containers/metrics
+showWidgetBorder = true
+baseRadius = "0.5rem"                 # Rounded corners on cards and inputs
+
+# Typography (Streamlit supports Google Fonts or clean system stacks)
+font = "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+codeFont = "JetBrains Mono, monospace"
+baseFontSize = 15
+headingFont = "Poppins, sans-serif"
+headingFontSizes = ["2.75rem", "1.75rem", "1.25rem"]
+headingFontWeights = [700, 600, 600]
+metricValueFontSize = "2rem"
+metricValueFontWeight = 700
+
+[theme.sidebar]
+backgroundColor = "#0F172A"           # Slightly darker sidebar for visual hierarchy
